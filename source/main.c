@@ -1,7 +1,7 @@
 /*	Author: christopherluu
  *  Partner(s) Name: 
- *	Lab Section:
- *	Assignment: Lab #  Exercise #
+ *	Lab Section: 22
+ *	Assignment: Lab #4  Exercise #1
  *	Exercise Description: [optional - include for your own benefit]
  *
  *	I acknowledge all content contained herein, excluding template or example
@@ -42,7 +42,7 @@ void Tick() {
             break;
     }
     
-    swtich(state){
+    switch(state){
         case START:
             PORTB = 0x01;
             break;
