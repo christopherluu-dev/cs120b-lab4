@@ -14,101 +14,106 @@
 
 enum States{
     START,
-    NOTHING,
+    INIT,
     ADD,
+    ADDON,
     MINUS,
-    RESET
+    MINUSON,
+    RESET,
+    RESETON
 } state;
 
 void Tick() {
+    unsigned char tempA0 = PINA & 0x01;
+    unsigned char tempA1 = PINA & 0x02;
+
     switch(state){
         case START:
-            state = NOTHING;
+            state = INIT;
             break;
-        case NOTHING:
-            if(PINA == 0x01){
+        case INIT:
+            if(!tempA0 && !tempA1){
+                state = INIT;
+            }
+            else if(tempA0 && !tempA1){
                 state = ADD;
             }
-            else if(PINA == 0x02){
+            else if(!tempA0 && tempA1){
                 state = MINUS;
             }
-            else if(PINA == 0x03){
+            else if(tempA0 && tempA1){
                 state = RESET;
-            }
-            else{
-                state = NOTHING;
             }
             break;
         case ADD:
-            if(PINA == 0x01){
-                state = ADD;
+            break;
+        case ADDON:
+            if(tempA0 && !tempA1){
+                state = ADDON;
             }
-            else if(PINA == 0x02){
-                state = MINUS;
-            }
-            else if(PINA == 0x03){
+            else if(tempA0 && tempA1){
                 state = RESET;
             }
             else{
-                state = NOTHING;
+                state = INIT;
             }
             break;
         case MINUS:
-            if(PINA == 0x01){
-                state = ADD;
+            break;
+        case MINUSON:
+            if(!tempA0 && tempA1){
+                state = MINUSON;
             }
-            else if(PINA == 0x02){
-                state = MINUS;
-            }
-            else if(PINA == 0x03){
+            else if(tempA0 && tempA1){
                 state = RESET;
             }
             else{
-                state = NOTHING;
+                state = INIT;
             }
             break;
         case RESET:
-            if(PINA == 0x01){
-                state = ADD;
-            }
-            else if(PINA == 0x02){
-                state = MINUS;
-            }
-            else if(PINA == 0x03){
-                state = RESET;
+            break;
+        case RESETON:
+            if(tempA0 && tempA1){
+                state = RESETON;
             }
             else{
-                state = NOTHING;
+                state = INIT;
             }
             break;
-        default:
-            state = NOTHING;
+       default:
+            state = INIT;
             break;
     }
     
     switch(state){
         case START:
-            PORTC = 0x07;
             break;
-        case NOTHING:
+        case INIT:
             break;
         case ADD:
             if(PORTC < 9){
-                PORTC++;
+                PORTC = PORTC + 1;
             }
+            state = ADDON;
+            break;
+        case ADDON:
             break;
         case MINUS:
             if(PORTC > 0){
-                PORTC--;
+                PORTC = PORTC - 1;
             }
+            state = MINUSON;
+            break;
+        case MINUSON:
             break;
         case RESET:
-            {
-                PORTC = 0;
-            }
+            PORTC = 0x00;
+            state = RESETON;
+            break;
+        case RESETON:
             break;
         default:
-            PORTC = 0x07;
             break;
     }
 }
@@ -119,6 +124,8 @@ int main(void) {
     DDRC = 0xFF; PORTC = 0x00;
 
     /* Insert your solution below */
+    state = START;
+    PORTC = 0x07;
     while (1) {
         Tick();
     }
